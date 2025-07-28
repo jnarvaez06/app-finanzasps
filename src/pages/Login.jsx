@@ -33,7 +33,7 @@ export default function Login() {
     
             if (response.ok) {
                 if (result?.token) {
-                    login(result.token);
+                    login(result.token, email);
                     // console.log(result.token)
                 }
                 navigate("/dashboard");
@@ -47,29 +47,47 @@ export default function Login() {
     }
 
   return (
-    <div className='container'>
-        <form autoComplete='off'>
+    <div
+      className="d-flex justify-content-center align-items-center vh-100"
+      style={{
+        background: 'linear-gradient(135deg, #74ebd5, #9face6)',
+      }}
+    >
+      <div className="card shadow p-4" style={{ width: '100%', maxWidth: '400px' }}>
+        <div className="card-body">
+          <h3 className="card-title text-center mb-4">Iniciar Sesión</h3>
+          <form autoComplete="off">
             <div className="mb-3">
-                <label htmlFor="email" className="form-label">Correo</label>
-                <input type="email" 
-                    className="form-control" 
-                    id="email" name='email'
-                    onChange={(e) => setEmail(e.target.value)}
-                />
+              <label htmlFor="email" className="form-label">Correo</label>
+              <input
+                type="email"
+                className="form-control"
+                id="email"
+                name="email"
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
             <div className="mb-3">
-                <label htmlFor="password" className="form-label">Contraseña</label>
-                <input 
-                    type="password" className="form-control"
-                    id="password" name='password'
-                    onChange={(e) => setPassword(e.target.value)}
-                />
+              <label htmlFor="password" className="form-label">Contraseña</label>
+              <input
+                type="password"
+                className="form-control"
+                id="password"
+                name="password"
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
-            <div className="mb-3 text-center">
-                <button type="submit" className="btn btn-primary me-3" onClick={handleLogin}>Ingresar</button>
-                <Link to={`/register`} className='btn btn-primary'>Registrarse</Link>
+            <div className="d-grid gap-2">
+              <button type="submit" className="btn btn-primary" onClick={handleLogin}>
+                Ingresar
+              </button>
+              <Link to="/register" className="btn btn-default">
+                Registrarse
+              </Link>
             </div>
-        </form>
+          </form>
+        </div>
+      </div>
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { API_URL } from '../api/config';
+import { API_URL_LOGIN } from '../api/config';
 import { useNavigate } from 'react-router-dom';
 
 export default function Register() {
@@ -8,11 +8,11 @@ export default function Register() {
     const [user, setUser] = useState({
         name:"",
         lastname:"",
-        email:"",
+        username:"",
         password:""
     })
 
-    const{name, lastname, email, password} = user;
+    const{name, lastname, username, password} = user;
 
     const onInputChange = (e) => {
         setUser({...user, [e.target.name]: e.target.value})
@@ -22,7 +22,7 @@ export default function Register() {
         e.preventDefault();
         
         try {
-            const response = await fetch(`${API_URL}/user`, {
+            const response = await fetch(`${API_URL_LOGIN}/register`, {
                 method: "POST",
                 headers: {
                 "Content-Type": "application/json",
@@ -32,7 +32,7 @@ export default function Register() {
     
             if (response.ok) {
                 alert("Usuario registrado correctamente");
-                navigate("/login");
+                navigate("/");
             } else {
                 const result = await response.json();
                 alert(result.message || "Error al registrar");
@@ -71,9 +71,9 @@ export default function Register() {
                 <div className="mb-3">
                     <label htmlFor="email" className="form-label">Correo</label>
                     <input 
-                        type="email" className="form-control"
-                        id="email" name='email'
-                        value={email}
+                        type="username" className="form-control"
+                        id="username" name='username'
+                        value={username}
                         onChange={(e)=>onInputChange(e)}
                         required={true}
                     />

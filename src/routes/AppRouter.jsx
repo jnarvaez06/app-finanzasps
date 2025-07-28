@@ -5,6 +5,9 @@ import Register from '../pages/Register'
 import Dashboard from '../pages/Dashboard'
 import PrivateRoute from './PrivateRoute'
 import Layout from '../layout/Layout'
+import Categories from '../pages/Categories'
+import SubCategories from '../pages/SubCategories'
+import Accounts from '../pages/Accounts'
 
 export default function AppRouter() {
 	return (
@@ -17,6 +20,9 @@ export default function AppRouter() {
 				{/* Rutas Protegidas */}
 				<Route element={<PrivateRoute><Layout /></PrivateRoute>}>
 					<Route path='/dashboard' element={<Dashboard />} />
+					<Route path='/categories' element={<Categories />} />
+					<Route path='/subcategories' element={<SubCategories />} />
+					<Route path='/accounts' element={<Accounts />} />
 				</Route>
 			</Routes>
 		</>
