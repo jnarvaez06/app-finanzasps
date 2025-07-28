@@ -42,8 +42,9 @@ export const AuthProvider = ({ children }) => {
       });
   }, []);
 
-  const login = (newToken) => {
+  const login = (newToken, email) => {
     sessionStorage.setItem("token", newToken);
+    sessionStorage.setItem("username", email);
     setToken(newToken);
     setIsAuthenticated(true);
   };
