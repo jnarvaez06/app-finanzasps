@@ -21,7 +21,7 @@ export default function Dashboard() {
     <div>
       <button onClick={() => setShowModal(true)}>Nuevo Movimiento</button>
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Registrar Gasto">
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Registrar Movimiento">
         <MovimientoForm
           onSubmit={handleGuardar}
           onCancel={() => setShowModal(false)}

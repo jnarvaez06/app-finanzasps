@@ -6,8 +6,11 @@ export default function MovimientoForm({ onSubmit, onCancel, initialData = {} })
   const [descripcion, setDescripcion] = useState(initialData.descripcion || '');
   const [monto, setMonto] = useState(initialData.monto || '');
   const [fecha, setFecha] = useState(initialData.fecha || new Date().toISOString().slice(0, 10));
-  const {accounts} = useCatalogos();
+  const {accounts, categories, subCategories, typesMovement} = useCatalogos();
   const [accountId, setAccountId] = useState(initialData.accountId || ''); 
+  const [categoryId, setCategoryId] = useState(initialData.categoryId || '');
+  const [subCategoryId, setSubCategoryId] = useState(initialData.subCategoryId || '');
+  const [typeMovementId, setTypeMovementId] = useState(initialData.typeMovementId || '');
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -15,9 +18,16 @@ export default function MovimientoForm({ onSubmit, onCancel, initialData = {} })
       descripcion,
       monto: parseFloat(monto),
       fecha,
-      accountId
+      accountId,
+      categoryId,
+      subCategoryId,
+      typeMovementId
     });
   };
+
+  const subcategoriasFiltradas = subCategories.filter(
+    (sc) => sc.category.idCategory == categoryId
+  );
 
   return (
     <form onSubmit={handleSubmit}>
@@ -33,12 +43,23 @@ export default function MovimientoForm({ onSubmit, onCancel, initialData = {} })
       </div>
 
       <div className="mb-3">
-        <label className="form-label">Descripción</label>
+        <label className="form-label">Tipo Movimiento</label>
+        <Select
+          options={typesMovement}
+          value={typeMovementId}
+          onChange={(val) => setTypeMovementId(val)}
+          labelKey='description'
+          valueKey='idType'
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">Fecha</label>
         <input
-          type="text"
+          type="date"
           className="form-control"
-          value={descripcion}
-          onChange={(e) => setDescripcion(e.target.value)}
+          value={fecha}
+          onChange={(e) => setFecha(e.target.value)}
           required
         />
       </div>
@@ -55,13 +76,37 @@ export default function MovimientoForm({ onSubmit, onCancel, initialData = {} })
       </div>
 
       <div className="mb-3">
-        <label className="form-label">Fecha</label>
+        <label className="form-label">Descripción</label>
         <input
-          type="date"
+          type="text"
           className="form-control"
-          value={fecha}
-          onChange={(e) => setFecha(e.target.value)}
+          value={descripcion}
+          onChange={(e) => setDescripcion(e.target.value)}
           required
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">Categoria</label>
+        <Select
+          options={categories}
+          value={categoryId}
+          onChange={(val) => setCategoryId(val)}
+          labelKey='description'
+          valueKey='idCategory'
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">Sub Categoria</label>
+        <Select
+          options={subcategoriasFiltradas}
+          value={subCategoryId}
+          onChange={setSubCategoryId}
+          labelKey='description'
+          valueKey='idSubCategory'
+          disabled={!categoryId}
+          placeholder={!categoryId ? "Seleccione Categoria..." : "Seleccione..."}
         />
       </div>
 
