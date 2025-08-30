@@ -1,58 +1,72 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useForm } from "react-hook-form";
 import { useCatalogos } from '../hooks/useCatalogos';
 import Select from './Select';
 import NumberInput from './NumberInput';
 
 export default function MovimientoForm({ onSubmit, onCancel, initialData = {} }) {
-  const [descripcion, setDescripcion] = useState(initialData.descripcion || '');
-  const [monto, setMonto] = useState(initialData.monto || '');
-  const [fecha, setFecha] = useState(initialData.fecha || new Date().toISOString().slice(0, 10));
-  const {accounts, categories, subCategories, typesMovement} = useCatalogos();
-  const [accountId, setAccountId] = useState(initialData.accountId || ''); 
-  const [categoryId, setCategoryId] = useState(initialData.categoryId || '');
-  const [subCategoryId, setSubCategoryId] = useState(initialData.subCategoryId || '');
-  const [typeMovementId, setTypeMovementId] = useState(initialData.typeMovementId || '');
+  const { accounts, categories, subCategories, typesMovement } = useCatalogos();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit({
-      descripcion,
-      monto: parseFloat(monto),
-      fecha,
-      accountId,
-      categoryId,
-      subCategoryId,
-      typeMovementId
-    });
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      descripcion: initialData.descripcion || "",
+      monto: initialData.monto || "",
+      fecha: initialData.fecha || new Date().toISOString().slice(0, 10),
+      accountId: initialData.accountId || "",
+      categoryId: initialData.categoryId || "",
+      subCategoryId: initialData.subCategoryId || "",
+      typeMovementId: initialData.typeMovementId || "",
+    },
+  });
+
+  const categoryId = watch("categoryId");
+  const subcategoriasFiltradas = Array.isArray(subCategories)
+  ? subCategories.filter((sc) => sc.category.idCategory == categoryId)
+  : [];
+
+  const handleFormSubmit = (data) => {
+    console.log("Datos enviados:", data);
+    onSubmit(data);
   };
 
-  const subcategoriasFiltradas = subCategories.filter(
-    (sc) => sc.category.idCategory == categoryId
-  );
+  const defaultMessage = 'Campo Requerido';
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit(handleFormSubmit)}>
       <div className='row'>
         <div className="col-md-6 mb-3">
           <label className="form-label">Cuenta</label>
           <Select
             options={accounts}
-            value={accountId}
-            onChange={(val) => setAccountId(val)}
             labelKey='description'
             valueKey='idAccount'
+            {...register("accountId", {
+              required: defaultMessage,
+            })}
           />
+          {errors.accountId && (
+            <div className="text-danger">{errors.accountId.message}</div>
+          )}
         </div>
 
         <div className="col-md-6 mb-3">
           <label className="form-label">Tipo Movimiento</label>
           <Select
             options={typesMovement}
-            value={typeMovementId}
-            onChange={(val) => setTypeMovementId(val)}
             labelKey='description'
             valueKey='idType'
+            {...register("typeMovementId", {
+              required: defaultMessage,
+            })}
           />
+          {errors.typeMovementId && (
+            <div className="text-danger">{errors.typeMovementId.message}</div>
+          )}
         </div>
       </div>
 
@@ -60,11 +74,15 @@ export default function MovimientoForm({ onSubmit, onCancel, initialData = {} })
         <div className="col-md-6 mb-3">
           <label className="form-label">Monto</label>
           <NumberInput
-            value={monto}
-            onChange={setMonto}
             className="form-control"
             placeholder="Ingrese Valor"
+            {...register("monto", {
+              required: defaultMessage,
+            })}
           />
+          {errors.monto && (
+            <div className="text-danger">{errors.monto.message}</div>
+          )}
         </div>
 
         <div className="col-md-6 mb-3">
@@ -72,10 +90,13 @@ export default function MovimientoForm({ onSubmit, onCancel, initialData = {} })
           <input
             type="date"
             className="form-control"
-            value={fecha}
-            onChange={(e) => setFecha(e.target.value)}
-            required
+            {...register("fecha", {
+              required: defaultMessage,
+            })}
           />
+          {errors.fecha && (
+            <div className="text-danger">{errors.fecha.message}</div>
+          )}
         </div>
       </div>
 
@@ -83,11 +104,15 @@ export default function MovimientoForm({ onSubmit, onCancel, initialData = {} })
         <label className="form-label">Descripción</label>
         <input
           type="text"
+          id="descripcion"
           className="form-control"
-          value={descripcion}
-          onChange={(e) => setDescripcion(e.target.value)}
-          required
+          {...register("descripcion", {
+            required: defaultMessage
+          })}
         />
+        {errors.descripcion && (
+          <div className="text-danger">{errors.descripcion.message}</div>
+        )}
       </div>
 
       <div className='row'>
@@ -95,34 +120,36 @@ export default function MovimientoForm({ onSubmit, onCancel, initialData = {} })
           <label className="form-label">Categoria</label>
           <Select
             options={categories}
-            value={categoryId}
-            onChange={(val) => setCategoryId(val)}
             labelKey='description'
             valueKey='idCategory'
+            {...register("categoryId", {
+              required: defaultMessage,
+            })}
           />
+          {errors.categoryId && (
+            <div className="text-danger">{errors.categoryId.message}</div>
+          )}
         </div>
 
         <div className="col-md-6 mb-3">
           <label className="form-label">Sub Categoria</label>
           <Select
             options={subcategoriasFiltradas}
-            value={subCategoryId}
-            onChange={setSubCategoryId}
             labelKey='description'
             valueKey='idSubCategory'
             disabled={!categoryId}
             placeholder={!categoryId ? "Seleccione Categoria..." : "Seleccione..."}
+            {...register("subCategoryId")}
           />
         </div>
       </div>
 
-
       <div className="d-flex justify-content-end gap-2">
-        <button type="button" className="btn btn-secondary" onClick={onCancel}>
-          Cancelar
-        </button>
         <button type="submit" className="btn btn-primary">
           Guardar
+        </button>
+        <button type="button" className="btn btn-default" onClick={onCancel}>
+          Cancelar
         </button>
       </div>
     </form>
