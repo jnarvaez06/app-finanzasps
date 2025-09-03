@@ -8,6 +8,7 @@ import Layout from '../layout/Layout'
 import Categories from '../pages/Categories'
 import SubCategories from '../pages/SubCategories'
 import Accounts from '../pages/Accounts'
+import Movements from '../pages/Movements'
 
 export default function AppRouter() {
 	return (
@@ -23,6 +24,7 @@ export default function AppRouter() {
 					<Route path='/categories' element={<Categories />} />
 					<Route path='/subcategories' element={<SubCategories />} />
 					<Route path='/accounts' element={<Accounts />} />
+					<Route path='/movements' element={<Movements />} />
 				</Route>
 			</Routes>
 		</>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Modal from '../components/Modal';
 import MovimientoForm from '../components/MovimientoForm';
 import { useMovimientos } from '../hooks/useMovimientos';
+import { Link } from 'react-router-dom';
 
 export default function Dashboard() {
   const [showModal, setShowModal] = useState(false);
@@ -20,7 +21,9 @@ export default function Dashboard() {
   return (
     <div>
       <button onClick={() => setShowModal(true)}>Nuevo Movimiento</button>
-
+      <Link to="/movements">
+        <button>Ver movimientos</button>
+      </Link>
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Registrar Movimiento">
         <MovimientoForm
           onSubmit={handleGuardar}

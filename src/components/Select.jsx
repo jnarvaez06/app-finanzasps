@@ -7,15 +7,15 @@ const Select = ({
     ...props
 }) => (
     <select 
-    className="form-select"
-    disabled={disabled}
-    {...props}   // <- aquí recibirá lo de register
+        className="form-select"
+        disabled={disabled}
+        {...props}   // <- aquí recibirá lo de register
     >
     <option value="">{placeholder}</option>
     {Array.isArray(options) &&
     options.map((opt) => (
         <option key={opt[valueKey]} value={opt[valueKey]}>
-        {opt[labelKey]}
+            {opt[labelKey]}
         </option>
     ))}
     </select>

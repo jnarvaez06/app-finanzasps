@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import { getAccountsSelect, getCategoriesSelect, getSubCategoriesSelect, getTypesMovement } from "../api/catalogos";
+import { getAccountsSelect, getCategoriesSelect, getMonths, getSubCategoriesSelect, getTypesMovement, getYears } from "../api/catalogos";
 
 export const CatalogosContext = createContext();
 
@@ -11,18 +11,24 @@ export const CatalogosProvider = ({children}) => {
             getAccountsSelect(),
             getCategoriesSelect(),
             getSubCategoriesSelect(),
-            getTypesMovement
+            getTypesMovement,
+            getMonths(),
+            getYears(),
         ]).then(([
                 accounts,
                 categories,
                 subCategories,
-                typesMovement
+                typesMovement,
+                months,
+                years,
             ]) => {
                 setCatalogos({
                     accounts,
                     categories,
                     subCategories,
-                    typesMovement
+                    typesMovement,
+                    months,
+                    years,
                 });
             }
         );

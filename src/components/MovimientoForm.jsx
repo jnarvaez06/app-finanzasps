@@ -76,6 +76,7 @@ export default function MovimientoForm({ onSubmit, onCancel, initialData = {} })
           <NumberInput
             className="form-control"
             placeholder="Ingrese Valor"
+            autoComplete="off"
             {...register("monto", {
               required: defaultMessage,
             })}

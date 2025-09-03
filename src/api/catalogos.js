@@ -38,3 +38,33 @@ export const getTypesMovement = [
       description: "Gasto"
     }
 ];
+
+export const getMonths = () => {
+    // Detectar el idioma del navegador
+    const idiomaBrowser = navigator.language || navigator.languages[0] || 'es-ES';
+    
+    const meses = [];
+    for (let i = 0; i < 12; i++) {
+        const fecha = new Date(2024, i, 1);
+        const nombreMes = fecha.toLocaleDateString(idiomaBrowser, { month: 'long' });
+        meses.push({
+            idMonth: i + 1,
+            description: nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1)
+        });
+    }
+    return meses;
+}
+
+export const getYears = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+
+    for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+        years.push({
+            idYear: i,
+            description: i.toString()
+        })        
+    }
+
+    return years;
+}
