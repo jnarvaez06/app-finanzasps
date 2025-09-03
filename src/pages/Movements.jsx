@@ -80,8 +80,9 @@ export default function Movements() {
                                 {...register("subCategoryId")}
                             />
                         </div>
-                        <div className="col-md-2 mb-3"><br/>
-                            <button className="btn btn-success" type="button">Buscar</button>
+                        <div className="col-md-2 mb-3">
+                            <label className="form-label">&nbsp;</label>
+                            <button className="btn btn-success d-block" type="button">Buscar</button>
                         </div>
                     </div>
                 </div>
