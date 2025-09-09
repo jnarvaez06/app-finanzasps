@@ -3,10 +3,12 @@ import Select from "../components/Select";
 import { useCatalogos } from "../hooks/useCatalogos";
 import { API_URL } from '../api/config';
 import { useState } from "react";
+import { useFormatCurrency } from "../hooks/useFormatCurrency";
 
 export default function Movements() {
     const { accounts, categories, subCategories, months, years } = useCatalogos();
     const currentDate = new Date();
+    const { formatCurrency } = useFormatCurrency({ locale: "es-CO", currency: "COP", decimals: 2 });
 
     const [movements, setMovements] = useState([]);
     const{register, handleSubmit, watch} = useForm({
@@ -52,6 +54,11 @@ export default function Movements() {
             console.error(error);
         }
     }
+
+    const total = movements.reduce((acc, m) => {
+        const value = Number(m.value || 0);
+        return m.type === "I" ? acc + value : acc - value;
+    }, 0);
 
     return(
         <div className="container py-4">
@@ -144,7 +151,7 @@ export default function Movements() {
                                         <td>{mov.categoryDescription}</td>
                                         <td>{mov.subCategoryDescription}</td>
                                         <td>{mov.description}</td>
-                                        <td className="text-end">{mov.value}</td>
+                                        <td className="text-end">{formatCurrency(mov.value)}</td>
                                         <td>{mov.dateMovement}</td>
                                         <td className="text-center">
                                             <button className="btn btn-sm btn-primary me-2">
@@ -160,11 +167,8 @@ export default function Movements() {
                                     <td colSpan="4" className="text-end">
                                         Total:
                                     </td>
-                                    <td>
-                                        {movements.reduce((acc, m) => {
-                                            const value = Number(m.value || 0);
-                                            return m.type === "I" ? acc + value : acc - value;
-                                        }, 0)}
+                                    <td className="text-end">
+                                        {formatCurrency(total)}
                                     </td>
                                     <td colSpan="2"></td>
                                 </tr>
