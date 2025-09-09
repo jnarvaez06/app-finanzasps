@@ -4,14 +4,21 @@ import { useCatalogos } from "../hooks/useCatalogos";
 import { API_URL } from '../api/config';
 import { useState } from "react";
 import { useFormatCurrency } from "../hooks/useFormatCurrency";
+import Modal from "../components/Modal";
+import MovimientoForm from "../components/MovimientoForm";
+import { useMovimientos } from "../hooks/useMovimientos";
 
 export default function Movements() {
     const { accounts, categories, subCategories, months, years } = useCatalogos();
+    const [showModal, setShowModal] = useState(false);
+    const [titleModal, setTitleModal] = useState("");
+    const [dataEditMovement, setDataEditMovement] = useState({});
+    const { guardarMovimiento, loading } = useMovimientos();
     const currentDate = new Date();
     const { formatCurrency } = useFormatCurrency({ locale: "es-CO", currency: "COP", decimals: 2 });
 
     const [movements, setMovements] = useState([]);
-    const{register, handleSubmit, watch} = useForm({
+    const{register, handleSubmit, watch, getValues} = useForm({
         defaultValues:{
             yearId: currentDate.getFullYear(),
             monthId: currentDate.getMonth() + 1,
@@ -60,12 +67,23 @@ export default function Movements() {
         return m.type === "I" ? acc + value : acc - value;
     }, 0);
 
+    const handleSaveMovement = async (data) => {
+        try {
+            const nuevo = await guardarMovimiento(data);
+            console.log('Guardado:', nuevo);
+            await onSubmit(getValues());
+            setShowModal(false);
+        } catch (err) {
+            console.error('Error al guardar:', err);
+        }
+    };
+
     return(
         <div className="container py-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h4 className="mb-0">Movimientos</h4>
-                <button className="btn btn-success">
-                    <i className="bi bi-plus-lg"></i> Nuevo
+                <button className="btn btn-success" onClick={() => {setShowModal(true);setTitleModal("Registrar Movimiento");setDataEditMovement({})}}>                    
+                    <i className="bi bi-plus-lg"></i> Nuevo Movimiento
                 </button>
             </div>
             <form onSubmit={handleSubmit(onSubmit)}>
@@ -154,7 +172,23 @@ export default function Movements() {
                                         <td className="text-end">{formatCurrency(mov.value)}</td>
                                         <td>{mov.dateMovement}</td>
                                         <td className="text-center">
-                                            <button className="btn btn-sm btn-primary me-2">
+                                            <button className="btn btn-sm btn-primary me-2" 
+                                                onClick={() => {
+                                                    setShowModal(true);
+                                                    setTitleModal("Editar Movimiento");
+                                                    setDataEditMovement({
+                                                        descripcion: mov.description || "",
+                                                        monto: mov.value || "",
+                                                        fecha: mov.dateMovement || new Date().toISOString().slice(0, 10),
+                                                        accountId: mov.accountId || "",
+                                                        categoryId: mov.categoryId || "",
+                                                        subCategoryId: mov.subCategoryId || "",
+                                                        typeMovementId: mov.type || "",
+                                                        isEdit: true,
+                                                        idMovement: mov.idMovement
+                                                    });
+                                                }}
+                                            >
                                                 Editar
                                             </button>
                                             <button className="btn btn-sm btn-warning">
@@ -184,6 +218,13 @@ export default function Movements() {
                     </tbody>
                 </table>
             </div>
+            <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={titleModal}>
+                <MovimientoForm
+                    onSubmit={handleSaveMovement}
+                    onCancel={() => setShowModal(false)}
+                    initialData={dataEditMovement}
+                />
+            </Modal>
         </div>
     );
 }

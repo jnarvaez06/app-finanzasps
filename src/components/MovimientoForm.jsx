@@ -21,6 +21,8 @@ export default function MovimientoForm({ onSubmit, onCancel, initialData = {} })
       categoryId: initialData.categoryId || "",
       subCategoryId: initialData.subCategoryId || "",
       typeMovementId: initialData.typeMovementId || "",
+      isEdit : initialData.isEdit || false,
+      idMovement: initialData.idMovement || ""
     },
   });
 
@@ -146,8 +148,8 @@ export default function MovimientoForm({ onSubmit, onCancel, initialData = {} })
       </div>
 
       <div className="d-flex justify-content-end gap-2">
-        <button type="submit" className="btn btn-primary">
-          Guardar
+        <button type="submit" className="btn btn-success">
+          {initialData.isEdit ? 'Actualizar' : 'Guardar'}
         </button>
         <button type="button" className="btn btn-default" onClick={onCancel}>
           Cancelar
