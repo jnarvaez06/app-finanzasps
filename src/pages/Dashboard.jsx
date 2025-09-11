@@ -24,6 +24,9 @@ export default function Dashboard() {
       <Link to="/movements">
         <button>Ver movimientos</button>
       </Link>
+      <Link to="/monthly_plan">
+        <button>Plan Mensual</button>
+      </Link>
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Registrar Movimiento">
         <MovimientoForm
           onSubmit={handleGuardar}
