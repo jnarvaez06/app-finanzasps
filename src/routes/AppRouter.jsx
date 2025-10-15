@@ -10,6 +10,7 @@ import SubCategories from '../pages/SubCategories'
 import Accounts from '../pages/Accounts'
 import Movements from '../pages/Movements'
 import MonthlyPlan from '../pages/MonthlyPlan'
+import MonthlyPlanHeader from '../pages/MonthlyPlanHeader'
 
 export default function AppRouter() {
 	return (
@@ -27,6 +28,7 @@ export default function AppRouter() {
 					<Route path='/accounts' element={<Accounts />} />
 					<Route path='/movements' element={<Movements />} />
 					<Route path='/monthly_plan' element={<MonthlyPlan />} />
+					<Route path='/monthly_plan_header' element={<MonthlyPlanHeader />} />
 				</Route>
 			</Routes>
 		</>

@@ -13,7 +13,7 @@ export default function MonthlyPlan() {
         window.location.href = '/';
     }
 
-    const { accounts, categories, subCategories, typesMovement } = useCatalogos();
+    const { accounts, categories, subCategories, typesMovement, years, months } = useCatalogos();
     const [showModal, setShowModal] = useState(false);
     const [titleModal, setTitleModal] = useState("");
     const [typeModal, setTypeModal] = useState("");
@@ -127,18 +127,22 @@ export default function MonthlyPlan() {
         }
     });
 
-    console.log("categorias", categorias);
-    console.log("monthlyPlans", monthlyPlans);
-
-
     // ---------- MEMO ----------
     const itemsByCategory = useMemo(() => {
-        if (!Array.isArray(monthlyPlans) || monthlyPlans.length === 0) return {};
-        return monthlyPlans.reduce((acc, plan) => {
-            acc[plan.categoryMonthlyPlanId] = plan.items || [];
-            return acc;
-        }, {});
-    }, [monthlyPlans]);
+        const combined = {}
+    
+        if (Array.isArray(monthlyPlans)) {
+            monthlyPlans.forEach((plan) => {
+                combined[plan.categoryMonthlyPlanId] = plan.items || []
+            })
+        }
+    
+        Object.entries(items).forEach(([catId, newItems]) => {
+            combined[catId] = [...(combined[catId] || []), ...newItems]
+        })
+    
+        return combined
+    }, [monthlyPlans, items])
 
     // ---------- MUTATIONS ----------
     const mutationCategory = useMutation({
@@ -149,29 +153,6 @@ export default function MonthlyPlan() {
         },
     });
 
-    const mutationItem = useMutation({
-        mutationFn: postItem,
-        onSuccess: () => {
-            queryClient.invalidateQueries(["monthlyPlans"]);
-            setShowModal(false);
-        },
-    });
-
-    const mutationUpdateCategory = useMutation({
-        mutationFn: putCategoria,
-        onSuccess: () => queryClient.invalidateQueries(["categorias"]),
-    });
-
-    const mutationUpdateItem = useMutation({
-        mutationFn: putItem,
-        onSuccess: () => queryClient.invalidateQueries(["monthlyPlans"]),
-    });
-
-    const mutationDeleteItem = useMutation({
-        mutationFn: deleteItem,
-        onSuccess: () => queryClient.invalidateQueries(["monthlyPlans"]),
-    });
-
     // ---------- FORM ----------
     const { register, handleSubmit, watch, formState: { errors } } = useForm();
 
@@ -179,17 +160,19 @@ export default function MonthlyPlan() {
         if (typeModal === "category") {
             mutationCategory.mutate(data);
         } else if (typeModal === "item") {
-            mutationItem.mutate(data);
-            // handleAddItem(data);
+            handleAddItem(data);
         }
     };
 
-    const handleAddItem = (data) => {
+    const handleAddItem = (data) => {        
         const newItem = {
-            idMonthlyPlanItem: Date.now(), // id temporal
+            idItemMonthlyPlan: Date.now(), // id temporal
             description: data.nameItemCategoryPlan,
             estimateAmount: data.estimateAmountCategoryPlan,
             realAmount: data.realAmountCategoryPlan,
+            category: data.categoryId,
+            subCategory: data.subCategoryId,
+            isRecurring : data.isRecurring
         };
     
         setItems((prev) => ({
@@ -198,24 +181,51 @@ export default function MonthlyPlan() {
         }));
     
         setShowModal(false);
+
     };
 
     // ---------- UI ----------
     return (
         <div className="container py-4">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h4 className="mb-0">Plan Mensual</h4>
-                <button 
+            <div className="row align-items-end mb-3">
+                <div className="col-auto">
+                    <h4 className="mb-0">Plan Mensual</h4>
+                </div>
+                
+                <div className="col-auto d-flex align-items-center gap-2">
+                    <label className="form-label mb-0">Año:</label>
+                    <Select
+                    options={years}
+                    labelKey="description"
+                    valueKey="idYear"
+                    className="form-control"
+                    />
+                </div>
+
+                <div className="col-auto d-flex align-items-center gap-2">
+                    <label className="form-label mb-0">Mes:</label>
+                    <Select
+                        options={months}
+                        labelKey="description"
+                        valueKey="idMonth"
+                        className="form-control"
+                    />
+                </div>
+
+                <div className="col d-flex justify-content-end">
+                    <button
                     className="btn btn-success"
                     onClick={() => {
                         setShowModal(true);
                         setTitleModal("Registrar categoría Plan Mensual");
                         setTypeModal("category");
                     }}
-                >
+                    >
                     <i className="bi bi-plus-lg"></i> Nueva Categoría
-                </button>
+                    </button>
+                </div>
             </div>
+
 
             {isPending && <strong>Cargando...</strong>}
             {error && <p>Ha habido un error!</p>}
@@ -242,28 +252,88 @@ export default function MonthlyPlan() {
                     </div>
                     <div className="card-body">
                         {itemsByCategory[cat.idCategoryMonthlyPlan]?.length > 0 ? (
-                            itemsByCategory[cat.idCategoryMonthlyPlan].map((item) => (
-                            <div
-                                key={item.idItemMonthlyPlan}
-                                className="d-flex justify-content-between align-items-center border-bottom py-2"
-                            >
-                                <span>
-                                {item.description} - Est: {item.estimateAmount} / Real: {item.realAmount}
-                                </span>
-                                <button
-                                className="btn btn-danger btn-sm"
-                                onClick={() => {
-                                    // Aquí iría la mutación DELETE
-                                }}
-                                >
-                                <i className="bi bi-trash"></i>
-                                </button>
-                            </div>
-                            ))
+                            <table className="table table-sm align-middle">
+                                <thead>
+                                    <tr>
+                                    <th>Descripción</th>
+                                    <th>Estimado</th>
+                                    <th>Real</th>
+                                    <th>Categoría</th>
+                                    <th>Subcategoría</th>
+                                    <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {itemsByCategory[cat.idCategoryMonthlyPlan].map((item, idx) => (
+                                    <tr key={item.idItemMonthlyPlan || idx}>
+                                        <td>{item.description}</td>
+                                        <td style={{ width: "120px" }}>
+                                            <input
+                                                type="number"
+                                                className="form-control form-control-sm"
+                                                value={item.estimateAmount}
+                                                onChange={(e) => handleUpdateItem(cat.idCategoryMonthlyPlan, item.idMonthlyPlanItem, "estimateAmount", e.target.value)}
+                                            />
+                                        </td>
+                                        <td style={{ width: "120px" }}>
+                                            <input
+                                                type="number"
+                                                className="form-control form-control-sm"
+                                                value={item.realAmount}
+                                                onChange={(e) => handleUpdateItem(cat.idCategoryMonthlyPlan, item.idMonthlyPlanItem, "realAmount", e.target.value)}
+                                            />
+                                        </td>
+                                        <td style={{ width: "160px" }}>
+                                            <select
+                                                className="form-select form-select-sm"
+                                                value={item.category}
+                                                onChange={(e) =>
+                                                    handleUpdateItem(cat.idCategoryMonthlyPlan, item.idMonthlyPlanItem, "category", e.target.value)
+                                                }
+                                            >
+                                                {categories.map((c) => (
+                                                    <option key={c.id} value={c.id}>
+                                                        {c.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </td>
+                                        <td style={{ width: "160px" }}>
+                                            <select
+                                                className="form-select form-select-sm"
+                                                value={item.subCategory || ""}
+                                                onChange={(e) =>
+                                                handleUpdateItem(cat.idCategoryMonthlyPlan, item.idMonthlyPlanItem, "subCategory", e.target.value)
+                                                }
+                                            >
+                                                <option value="">Seleccione</option>
+                                                {subCategories
+                                                .filter((s) => s.categoryId === item.category)
+                                                .map((s) => (
+                                                    <option key={s.id} value={s.id}>
+                                                    {s.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </td>
+                                        
+                                        <td className="text-end">
+                                            <button
+                                                className="btn btn-outline-danger btn-sm"
+                                                onClick={() => handleDeleteItem(cat.idCategoryMonthlyPlan, item.idMonthlyPlanItem)}
+                                            >
+                                                <i className="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         ) : (
                             <p className="text-muted">Sin ítems aún</p>
                         )}
-                    </div>   
+                    </div>
+
                 </div>
             ))}
 
@@ -380,6 +450,18 @@ const htmlItemCategoryPlan = ({ register, handleSubmit, watch, onSubmit, errors,
                         placeholder={!categoryId ? "Seleccione Categoria..." : "Seleccione..."}
                         {...register("subCategoryId")}
                     />
+                </div>
+            </div>
+            <div className="row">
+                <div className="col-md6 mb-3">
+                    <div className="form-check form-switch">
+                        <input 
+                            className="form-check-input"
+                            type="checkbox"
+                            {...register("isRecurring")}
+                        />
+                        <label className="form-check-label">Registro Recurrente</label>
+                    </div>
                 </div>
             </div>
             <div className="d-flex justify-content-end gap-2">

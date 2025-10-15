@@ -24,7 +24,7 @@ export default function Dashboard() {
       <Link to="/movements">
         <button>Ver movimientos</button>
       </Link>
-      <Link to="/monthly_plan">
+      <Link to="/monthly_plan_header">
         <button>Plan Mensual</button>
       </Link>
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Registrar Movimiento">
