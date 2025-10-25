@@ -9,7 +9,7 @@ import Categories from '../pages/Categories'
 import SubCategories from '../pages/SubCategories'
 import Accounts from '../pages/Accounts'
 import Movements from '../pages/Movements'
-import MonthlyPlan from '../pages/MonthlyPlan'
+import MonthlyPlan from '../pages/MonthlyPlan/MonthlyPlan'
 import MonthlyPlanHeader from '../pages/MonthlyPlanHeader'
 
 export default function AppRouter() {
