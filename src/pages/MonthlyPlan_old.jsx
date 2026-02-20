@@ -184,15 +184,19 @@ export default function MonthlyPlan() {
 
     };
 
-    const handleToggleRecurring = (categoryId, itemId) => {
-        setItems(prev => ({
-        ...prev,
-        [categoryId]: prev[categoryId].map(item =>
-            item.idMonthlyPlanItem === itemId
-            ? { ...item, isRecurring: !item.isRecurring } // 👈 invierte el valor
-            : item
-        )
-        }));
+    const handleToggleRecurring = (categoryId, itemUniqueId) => {
+        setItems(prev => {
+            if (!prev || !prev[categoryId]) return prev;
+        
+            return {
+                ...prev,
+                [categoryId]: prev[categoryId].map(it =>
+                (it.idMonthlyPlanItem || it.idItemMonthlyPlan || it.id) === itemUniqueId
+                    ? { ...it, isRecurring: !Boolean(it.isRecurring) }
+                    : it
+                )
+            };
+        });
     };
 
     const handleUpdateItem = (categoryId, itemId, field, value) => {
@@ -204,6 +208,23 @@ export default function MonthlyPlan() {
                 : item
             ),
         }));
+    };
+
+    const handleSelectChange = (categoryId, itemUniqueId, field, value) => {
+        setItems(prev => {
+            // si prev no existe o no tiene la categoría, devolver prev tal cual
+            if (!prev || !prev[categoryId]) return prev;
+        
+            return {
+                ...prev,
+                [categoryId]: prev[categoryId].map(it =>
+                // comparamos con el id único del item (ver nota abajo sobre nombres)
+                (it.idMonthlyPlanItem || it.idItemMonthlyPlan || it.id) === itemUniqueId
+                    ? { ...it, [field]: value }
+                    : it
+                )
+            };
+        });
     };
 
     // ---------- UI ----------
@@ -287,8 +308,9 @@ export default function MonthlyPlan() {
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    
                                     {itemsByCategory[cat.idCategoryMonthlyPlan].map((item, idx) => (
-                                    <tr key={item.idItemMonthlyPlan || idx}>
+                                    <tr key={item.idItemMonthlsiyPlan || idx}>
                                         <td>{item.description}</td>
                                         <td style={{ width: "120px" }}>
                                             <input
@@ -311,23 +333,23 @@ export default function MonthlyPlan() {
                                                 options={categories}
                                                 labelKey="description"
                                                 valueKey="idCategory"
-                                                value={item.category}
+                                                value={item.category || ""}
                                                 className="form-select form-select-sm"
                                                 onChange={(e) =>
-                                                    handleUpdateItem(cat.idCategoryMonthlyPlan, item.idMonthlyPlanItem, "category", e.target.value)
+                                                    handleSelectChange(cat.idCategoryMonthlyPlan, itemId, "category", e.target.value)
                                                 }
                                             />
                                         </td>
                                         <td style={{ width: "160px" }}>
                                             <Select
-                                                options={subCategories}
-                                                labelKey='description'
-                                                valueKey='idSubCategory'
+                                                options={subCategories.filter(sc => sc.category.idCategory == item.category)} // si aplicas filtro
+                                                labelKey="description"
+                                                valueKey="idSubCategory"
                                                 placeholder={!item.category ? "Seleccione Categoria..." : "Seleccione..."}
-                                                value={item.subCategory}
+                                                value={item.subCategory || ""}
                                                 className="form-select form-select-sm"
                                                 onChange={(e) =>
-                                                    handleUpdateItem(cat.idCategoryMonthlyPlan, item.idMonthlyPlanItem, "subCategory", e.target.value)
+                                                  handleSelectChange(cat.idCategoryMonthlyPlan, itemId, "subCategory", e.target.value)
                                                 }
                                             />
                                         </td>
@@ -336,8 +358,8 @@ export default function MonthlyPlan() {
                                                 <input 
                                                     className="form-check-input"
                                                     type="checkbox"
-                                                    checked={item.isRecurring}
-                                                    onChange={() => handleToggleRecurring(cat.idCategoryMonthlyPlan, item.idMonthlyPlanItem)}
+                                                    checked={!!item.isRecurring}
+                                                    onChange={() => handleToggleRecurring(cat.idCategoryMonthlyPlan, itemId)}
                                                 />
                                             </div>
                                         </td>
