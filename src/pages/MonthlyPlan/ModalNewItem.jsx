@@ -3,19 +3,23 @@ import { useCatalogos } from "../../hooks/useCatalogos";
 import NumberInput from "../../components/NumberInput";
 import Select from "../../components/Select";
 
-export default function ModalNewItemMonthlyPlan() {
+export default function ModalNewItemMonthlyPlan({ onAddItem, categoryId, onClose }) {
     const { accounts, categories, subCategories, typesMovement } = useCatalogos();
 
     const {register, handleSubmit, watch, formState: {errors}, reset} = useForm();
 
     const onSubmit = (data) => {
         console.log("Aqui procesa:", data);
+        if (onAddItem && categoryId) {
+            onAddItem(categoryId, data);
+        }
         reset();
+        onClose();
     };
 
-    const categoryId = watch("categoryId");
+    const selectedCategoryId = watch("categoryId");
     const subcategoriasFiltradas = Array.isArray(subCategories)
-    ? subCategories.filter((sc) => sc.category.idCategory == categoryId)
+    ? subCategories.filter((sc) => sc.category.idCategory == selectedCategoryId)
     : [];
 
     const defaultMessage = 'Campo Requerido';
@@ -83,8 +87,8 @@ export default function ModalNewItemMonthlyPlan() {
                         options={subcategoriasFiltradas}
                         labelKey='description'
                         valueKey='idSubCategory'
-                        disabled={!categoryId}
-                        placeholder={!categoryId ? "Seleccione Categoria..." : "Seleccione..."}
+                        disabled={!selectedCategoryId}
+                        placeholder={!selectedCategoryId ? "Seleccione Categoria..." : "Seleccione..."}
                         {...register("subCategoryId")}
                     />
                 </div>

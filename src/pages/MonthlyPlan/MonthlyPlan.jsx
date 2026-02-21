@@ -7,6 +7,7 @@ import ModalNewCategoryMonthlyPlan from "./ModalNewCategory";
 import { useState } from "react";
 import ModalNewItemMonthlyPlan from "./ModalNewItem";
 import { useCategoryMonthlyPlan } from "./hooks/useCategoryMonthlyPlan";
+import MonthlyPlanItems from "./MonthlyPlanItems";
 
 export default function MonthlyPlan() {
     const { accounts, categories, subCategories, typesMovement, years, months } = useCatalogos();
@@ -55,6 +56,41 @@ export default function MonthlyPlan() {
         mutation.mutate(data);
     };
 
+    const handleAddItem = (categoryId, newItem) => {
+        console.log(newItem);
+        setItems((prev) => {
+            const existingItems = prev[categoryId] || [];
+            return {
+                ...prev,
+                [categoryId]: [...existingItems, newItem],
+            };
+        });
+    };
+
+    const handleItemChange = (categoryId, index, field, value) => {
+        setItems((prev) => {
+            const updated = { ...prev };
+            const itemsArray = [...updated[categoryId]];
+            itemsArray[index] = { ...itemsArray[index], [field]: value };
+            updated[categoryId] = itemsArray;
+            return updated;
+        });
+    };
+    
+    const handleSaveItem = (categoryId, index) => {
+        const item = items[categoryId][index];
+        console.log("Guardar ítem:", item);
+        // Aquí puedes usar tu mutation o fetch
+    };
+    
+    const handleDeleteItem = (categoryId, index) => {
+        setItems((prev) => {
+            const updated = { ...prev };
+            updated[categoryId] = updated[categoryId].filter((_, i) => i !== index);
+            return updated;
+        });
+    };
+    
     return(
         <div className="container py-4">
             <div className="row align-items-end mb-3">
@@ -135,9 +171,15 @@ export default function MonthlyPlan() {
                                 </button>
                             </div>
                         </div>
-                        <div className="card-body">
-                                <p className="text-muted">Sin ítems aún</p>
-                        </div>
+                        <MonthlyPlanItems
+                            categoryId={cat.idCategoryMonthlyPlan}
+                            items={items[cat.idCategoryMonthlyPlan] || []}
+                            categories={categories}
+                            subCategories={subCategories}
+                            onChangeItem={handleItemChange}
+                            onSaveItem={handleSaveItem}
+                            onDeleteItem={handleDeleteItem}
+                        />
                     </div>
                 ))}
             </div>
@@ -145,7 +187,14 @@ export default function MonthlyPlan() {
 
             {/* MODALS */}
             <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={titleModal}>
-                {typeModal == 'category' ? <ModalNewCategoryMonthlyPlan /> : <ModalNewItemMonthlyPlan />}
+                {typeModal == 'category' 
+                    ? <ModalNewCategoryMonthlyPlan />
+                    : <ModalNewItemMonthlyPlan
+                        onAddItem={handleAddItem}
+                        categoryId={selectedCategory}
+                        onClose={() => setShowModal(false)} 
+                    />
+                }
             </Modal>
 
         </div>
